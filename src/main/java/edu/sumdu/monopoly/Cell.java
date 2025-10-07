@@ -1,41 +1,41 @@
 package edu.sumdu.monopoly;
 
 public abstract class Cell {
-	private boolean available = true;
-	private String name;
-	protected Player owner;
+    private String name;
+    protected Player player;
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public Player getOwner() {
-		return owner;
-	}
-	
-	public int getPrice() {
-		return 0;
-	}
+    public Player getPlayer() {
+        return player;
+    }
 
-	public boolean isAvailable() {
-		return available;
-	}
-	
-	public abstract void playAction();
+    public int getPrice() {
+        return 0;
+    }
 
-	public void setAvailable(boolean available) {
-		this.available = available;
-	}
-	
-	void setName(String name) {
-		this.name = name;
-	}
+    /**
+     * За замовчуванням комірки недоступні для придбання
+     * Перевизначено в OwnedCell для комірок з власниками
+     */
+    public boolean isAvailable() {
+        return false;
+    }
 
-	public void setOwner(Player owner) {
-		this.owner = owner;
-	}
-    
+    public abstract void playAction();
+
+    void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
     public String toString() {
         return name;
     }
+
 }

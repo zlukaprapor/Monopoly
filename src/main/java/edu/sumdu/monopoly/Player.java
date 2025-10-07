@@ -26,7 +26,7 @@ public class Player {
 	}
 
     public void buyProperty(Cell property, int amount) {
-        property.setOwner(this);
+        property.setPlayer(this);
         if(property instanceof PropertyCell) {
             PropertyCell cell = (PropertyCell)property;
             properties.add(cell);
@@ -67,7 +67,7 @@ public class Player {
 	public void exchangeProperty(Player player) {
 		for(int i = 0; i < getPropertyNumber(); i++ ) {
 			PropertyCell cell = getProperty(i);
-			cell.setOwner(player);
+			cell.setPlayer(player);
 			if(player == null) {
 				cell.setAvailable(true);
 				cell.setNumHouses(0);
@@ -174,25 +174,31 @@ public class Player {
 			exchangeProperty(owner);
 		}
 	}
-	
-	public void purchase() {
-		if(getPosition().isAvailable()) {
-			Cell c = getPosition();
-			c.setAvailable(false);
-			if(c instanceof PropertyCell) {
-				PropertyCell cell = (PropertyCell)c;
-				purchaseProperty(cell);
-			}
-			if(c instanceof RailRoadCell) {
-				RailRoadCell cell = (RailRoadCell)c;
-				purchaseRailRoad(cell);
-			}
-			if(c instanceof UtilityCell) {
-				UtilityCell cell = (UtilityCell)c;
-				purchaseUtility(cell);
-			}
-		}
-	}
+
+    // Фрагмент методу purchase() в класі Player
+// Показує, як додати приведення типу для setAvailable
+
+    public void purchase() {
+        if(getPosition().isAvailable()) {
+            Cell c = getPosition();
+            // Додаємо приведення до OwnedCell, оскільки setAvailable
+            // тепер є лише в OwnedCell
+            ((OwnedCell)c).setAvailable(false);
+
+            if(c instanceof PropertyCell) {
+                PropertyCell cell = (PropertyCell)c;
+                purchaseProperty(cell);
+            }
+            if(c instanceof RailRoadCell) {
+                RailRoadCell cell = (RailRoadCell)c;
+                purchaseRailRoad(cell);
+            }
+            if(c instanceof UtilityCell) {
+                UtilityCell cell = (UtilityCell)c;
+                purchaseUtility(cell);
+            }
+        }
+    }
 	
 	public void purchaseHouse(String selectedMonopoly, int houses) {
 		GameBoard gb = GameMaster.instance().getGameBoard();
@@ -222,7 +228,7 @@ public class Player {
 	}
 
     public void sellProperty(Cell property, int amount) {
-        property.setOwner(null);
+        property.setPlayer(null);
         if(property instanceof PropertyCell) {
             properties.remove(property);
         }
