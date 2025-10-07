@@ -7,6 +7,23 @@ public class PropertyCell extends OwnedCell {
     private int rent;
     private int sellPrice;
 
+    @Override
+    public void addToPlayer(Player player) {
+        player.addProperty(this);
+        player.incrementColorGroup(this.getColorGroup());
+    }
+
+    @Override
+    public void removeFromPlayer(Player player) {
+        player.removeProperty(this);
+        player.decrementColorGroup(this.getColorGroup());
+    }
+
+    @Override
+    public void purchase(Player player) {
+        player.buyProperty(this, this.getPrice());
+    }
+
     public String getColorGroup() {
         return colorGroup;
     }

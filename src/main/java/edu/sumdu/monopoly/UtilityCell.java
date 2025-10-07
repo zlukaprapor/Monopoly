@@ -5,6 +5,23 @@ public class UtilityCell extends OwnedCell {
     public static final String COLOR_GROUP = "UTILITY";
     private static int PRICE;
 
+    @Override
+    public void addToPlayer(Player player) {
+        player.addUtility(this);
+        player.incrementColorGroup(UtilityCell.COLOR_GROUP);
+    }
+
+    @Override
+    public void removeFromPlayer(Player player) {
+        player.removeUtility(this);
+        player.decrementColorGroup(UtilityCell.COLOR_GROUP);
+    }
+
+    @Override
+    public void purchase(Player player) {
+        player.buyProperty(this, this.getPrice());
+    }
+
     public static void setPrice(int price) {
         UtilityCell.PRICE = price;
     }

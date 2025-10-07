@@ -5,6 +5,23 @@ public class RailRoadCell extends OwnedCell {
     static public String COLOR_GROUP = "RAILROAD";
     static private int price;
 
+    @Override
+    public void addToPlayer(Player player) {
+        player.addRailroad(this);
+        player.incrementColorGroup(RailRoadCell.COLOR_GROUP);
+    }
+
+    @Override
+    public void removeFromPlayer(Player player) {
+        player.removeRailroad(this);
+        player.decrementColorGroup(RailRoadCell.COLOR_GROUP);
+    }
+
+    @Override
+    public void purchase(Player player) {
+        player.buyProperty(this, this.getPrice());
+    }
+
     public static void setBaseRent(int baseRent) {
         RailRoadCell.baseRent = baseRent;
     }

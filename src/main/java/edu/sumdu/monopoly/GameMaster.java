@@ -122,8 +122,13 @@ public class GameMaster {
     public void completeTrade(TradeDeal deal) {
         Player seller = getPlayer(deal.getPlayerIndex());
         Cell property = gameBoard.queryCell(deal.getPropertyName());
-        seller.sellProperty(property, deal.getAmount());
-        getCurrentPlayer().buyProperty(property, deal.getAmount());
+
+        // Додаємо перевірку та приведення типу
+        if (property instanceof OwnedCell) {
+            OwnedCell ownedProperty = (OwnedCell) property;
+            seller.sellProperty(ownedProperty, deal.getAmount());
+            getCurrentPlayer().buyProperty(ownedProperty, deal.getAmount());
+        }
     }
 
     public Card drawCCCard() {

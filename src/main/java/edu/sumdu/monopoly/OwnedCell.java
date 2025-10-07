@@ -17,4 +17,22 @@ public abstract class OwnedCell extends Cell {
 
     @Override
     public abstract void playAction();
+
+    /**
+     * Додає цю власність до колекцій гравця
+     * Кожен підклас реалізує свою специфічну логіку
+     */
+    public abstract void addToPlayer(Player player);
+
+    /**
+     * Видаляє цю власність з колекцій гравця
+     * Кожен підклас реалізує свою специфічну логіку
+     */
+    public abstract void removeFromPlayer(Player player);
+
+    /**
+     * Виконує покупку цієї власності гравцем
+     * Кожен підклас реалізує свою специфічну логіку
+     */
+    public abstract void purchase(Player player);
 }
