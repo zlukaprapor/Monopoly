@@ -1,68 +1,63 @@
 package edu.sumdu.monopoly.gui;
 
-import java.awt.*;
-
-import javax.swing.*;
-import javax.swing.border.BevelBorder;
-
+import javafx.geometry.Pos;
+import javafx.scene.control.Label;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import edu.sumdu.monopoly.*;
 
-public class GUICell extends JPanel {
+public class GUICell extends StackPane {
+    private Cell cell;
+    private Label lblInfo;
+    private Label[] lblPlayers = new Label[GameMaster.MAX_PLAYER];
 
-	private Cell cell;
-	private JLabel lblInfo;
-	private JLabel[] lblPlayers = new JLabel[GameMaster.MAX_PLAYER];
-	
     public GUICell(Cell cell) {
         this.cell = cell;
-        setLayout(new OverlayLayout(this));
-        setBorder(new BevelBorder(BevelBorder.LOWERED));
-        JPanel pnlPlayer = new JPanel();
-        pnlPlayer.setLayout(new GridLayout(2, 4));
-        pnlPlayer.setOpaque(false);
+
+        setBorder(new Border(new BorderStroke(
+                Color.GRAY, BorderStrokeStyle.SOLID,
+                CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+
+        GridPane pnlPlayer = new GridPane();
+        pnlPlayer.setAlignment(Pos.CENTER);
         createPlayerLabels(pnlPlayer);
-        add(pnlPlayer);
-        setPreferredSize(new Dimension(100,100));
+
+        setPrefSize(100, 100);
         addCellInfo();
-        this.doLayout();
-	}
-	
-	private void addCellInfo() {
-        lblInfo = new JLabel();
-		displayInfo();
-        JPanel pnlInfo = new JPanel();
-        pnlInfo.setLayout(new GridLayout(1, 1));
-        pnlInfo.add(lblInfo);
-        add(pnlInfo);
+
+        getChildren().addAll(lblInfo, pnlPlayer);
     }
-	
-	public void addPlayer(int index) {
-		Player player = GameMaster.instance().getPlayer(index);
-		lblPlayers[index].setText(player.getName().substring(0, 1));
-		lblPlayers[index].setOpaque(true);
-	}
 
-    private void createPlayerLabels(JPanel pnlPlayer) {
-		for (int i = 0; i < GameMaster.MAX_PLAYER; i++) {
-			lblPlayers[i] = new JLabel();
-			lblPlayers[i].setBackground(Color.GREEN);
-			pnlPlayer.add(lblPlayers[i]);
-		}
-	}
+    private void addCellInfo() {
+        lblInfo = new Label();
+        lblInfo.setAlignment(Pos.CENTER);
+        displayInfo();
+    }
 
-	public void displayInfo() {
-		lblInfo.setText(InfoFormatter.cellInfo(cell));
-        this.invalidate();
-		this.repaint();
-	}
+    public void addPlayer(int index) {
+        Player player = GameMaster.instance().getPlayer(index);
+        lblPlayers[index].setText(player.getName().substring(0, 1));
+        lblPlayers[index].setStyle("-fx-background-color: green; -fx-padding: 2;");
+    }
 
-	public Cell getCell() {
-		return cell;
-	}
-	
-	public void removePlayer(int index) {
-		lblPlayers[index].setText("");
-		lblPlayers[index].setOpaque(false);
-        this.repaint();
-	}
+    private void createPlayerLabels(GridPane pnlPlayer) {
+        for (int i = 0; i < GameMaster.MAX_PLAYER; i++) {
+            lblPlayers[i] = new Label();
+            lblPlayers[i].setPrefSize(20, 20);
+            pnlPlayer.add(lblPlayers[i], i % 4, i / 4);
+        }
+    }
+
+    public void displayInfo() {
+        lblInfo.setText(InfoFormatter.cellInfo(cell));
+    }
+
+    public Cell getCell() {
+        return cell;
+    }
+
+    public void removePlayer(int index) {
+        lblPlayers[index].setText("");
+        lblPlayers[index].setStyle("");
+    }
 }

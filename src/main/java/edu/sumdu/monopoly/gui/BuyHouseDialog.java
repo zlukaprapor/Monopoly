@@ -1,81 +1,78 @@
 package edu.sumdu.monopoly.gui;
 
-import java.awt.Container;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import edu.sumdu.monopoly.Player;
 
+public class BuyHouseDialog extends Stage {
+    private ComboBox<String> cboMonopoly;
+    private ComboBox<Integer> cboNumber;
+    private Player player;
 
-public class BuyHouseDialog extends JDialog {
-	private JComboBox cboMonopoly;
-	private JComboBox cboNumber;
+    public BuyHouseDialog(Player player) {
+        this.player = player;
+        initModality(Modality.APPLICATION_MODAL);
+        setTitle("Buy House");
 
-	private Player player;
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(10));
+        grid.setHgap(10);
+        grid.setVgap(10);
 
-	public BuyHouseDialog(Player player) {
-		this.player = player;
-		Container c = this.getContentPane();
-		c.setLayout(new GridLayout(3, 2));
-		c.add(new JLabel("Select monopoly"));
-		c.add(buildMonopolyComboBox());
-		c.add(new JLabel("Number of houses"));
-		c.add(buildNumberComboBox());
-		c.add(buildOKButton());
-		c.add(buildCancelButton());
-		c.doLayout();
-		this.pack();
-	}
+        grid.add(new Label("Select monopoly"), 0, 0);
+        grid.add(buildMonopolyComboBox(), 1, 0);
+        grid.add(new Label("Number of houses"), 0, 1);
+        grid.add(buildNumberComboBox(), 1, 1);
+        grid.add(buildOKButton(), 0, 2);
+        grid.add(buildCancelButton(), 1, 2);
 
-	private JButton buildCancelButton() {
-		JButton btn = new JButton("Cancel");
-		btn.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {
-				cancelClicked();
-			}
-		});
-		return btn;
-	}
+        Scene scene = new Scene(grid);
+        setScene(scene);
+    }
 
-	private JComboBox buildMonopolyComboBox() {
-		cboMonopoly = new JComboBox(player.getMonopolies());
-		return cboMonopoly;
-	}
-	
-	private JComboBox buildNumberComboBox() {
-		cboNumber = new JComboBox(new Integer[]{
-				new Integer(1),
-				new Integer(2),
-				new Integer(3),
-				new Integer(4),
-				new Integer(5)});
-		return cboNumber;
-	}
+    private Button buildCancelButton() {
+        Button btn = new Button("Cancel");
+        btn.setOnAction(e -> cancelClicked());
+        return btn;
+    }
 
-	private JButton buildOKButton() {
-		JButton btn = new JButton("OK");
-		btn.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {
-				okClicked();
-			}
-		});
-		return btn;
-	}
-	
-	private void cancelClicked() {
-		this.dispose();
-	}
-	
-	private void okClicked() {
-		String monopoly = (String)cboMonopoly.getSelectedItem();
-		int number = cboNumber.getSelectedIndex() + 1;
-		player.purchaseHouse(monopoly, number);
-		this.dispose();
-	}
+    private ComboBox<String> buildMonopolyComboBox() {
+        cboMonopoly = new ComboBox<>();
+        String[] monopolies = player.getMonopolies();
+        cboMonopoly.getItems().addAll(monopolies);
+        if (monopolies.length > 0) {
+            cboMonopoly.getSelectionModel().selectFirst();
+        }
+        return cboMonopoly;
+    }
+
+    private ComboBox<Integer> buildNumberComboBox() {
+        cboNumber = new ComboBox<>();
+        cboNumber.getItems().addAll(1, 2, 3, 4, 5);
+        cboNumber.getSelectionModel().selectFirst();
+        return cboNumber;
+    }
+
+    private Button buildOKButton() {
+        Button btn = new Button("OK");
+        btn.setOnAction(e -> okClicked());
+        return btn;
+    }
+
+    private void cancelClicked() {
+        close();
+    }
+
+    private void okClicked() {
+        String monopoly = cboMonopoly.getValue();
+        int number = cboNumber.getSelectionModel().getSelectedIndex() + 1;
+        player.purchaseHouse(monopoly, number);
+        close();
+    }
 }

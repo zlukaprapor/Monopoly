@@ -1,103 +1,101 @@
 package edu.sumdu.monopoly.gui;
 
-import java.awt.*;
-import java.awt.Container;
-import java.awt.GridLayout;
-import java.awt.event.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import javafx.geometry.Insets;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import edu.sumdu.monopoly.*;
+
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.*;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-
-import edu.sumdu.monopoly.*;
-import edu.sumdu.monopoly.TradeDeal;
-import edu.sumdu.monopoly.TradeDialog;
-
-public class GUITradeDialog extends JDialog implements TradeDialog {
-    private JButton btnOK, btnCancel;
-    private JComboBox cboSellers, cboProperties;
-
+public class GUITradeDialog extends Stage implements TradeDialog {
+    private Button btnOK, btnCancel;
+    private ComboBox<Player> cboSellers;
+    private ComboBox<edu.sumdu.monopoly.Cell> cboProperties;
     private TradeDeal deal;
-    private JTextField txtAmount;
-    
-    public GUITradeDialog(Frame parent) {
-        super(parent);
-        
+    private TextField txtAmount;
+
+    public GUITradeDialog() {
+        initModality(Modality.APPLICATION_MODAL);
         setTitle("Trade Property");
-        cboSellers = new JComboBox();
-        cboProperties = new JComboBox();
-        txtAmount = new JTextField();
-        btnOK = new JButton("OK");
-        btnCancel = new JButton("Cancel");
-        
-        btnOK.setEnabled(false);
-        
+
+        cboSellers = new ComboBox<>();
+        cboProperties = new ComboBox<>();
+        txtAmount = new TextField();
+        btnOK = new Button("OK");
+        btnCancel = new Button("Cancel");
+
+        btnOK.setDisable(true);
+
         buildSellersCombo();
-        setModal(true);
-             
-        Container contentPane = getContentPane();
-        contentPane.setLayout(new GridLayout(4, 2));
-        contentPane.add(new JLabel("Sellers"));
-        contentPane.add(cboSellers);
-        contentPane.add(new JLabel("Properties"));
-        contentPane.add(cboProperties);
-        contentPane.add(new JLabel("Amount"));
-        contentPane.add(txtAmount);
-        contentPane.add(btnOK);
-        contentPane.add(btnCancel);
-        
-        btnCancel.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e) {
-                GUITradeDialog.this.hide();
-            }
-        });
-        
-        cboSellers.addItemListener(new ItemListener(){
-            public void itemStateChanged(ItemEvent e) {
-                Player player = (Player)e.getItem();
+
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(10));
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        grid.add(new Label("Sellers"), 0, 0);
+        grid.add(cboSellers, 1, 0);
+        grid.add(new Label("Properties"), 0, 1);
+        grid.add(cboProperties, 1, 1);
+        grid.add(new Label("Amount"), 0, 2);
+        grid.add(txtAmount, 1, 2);
+        grid.add(btnOK, 0, 3);
+        grid.add(btnCancel, 1, 3);
+
+        btnCancel.setOnAction(e -> close());
+
+        cboSellers.setOnAction(e -> {
+            Player player = cboSellers.getValue();
+            if (player != null) {
                 updatePropertiesCombo(player);
             }
         });
-        
-        btnOK.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                int amount = 0;
-                try{
-                    amount = Integer.parseInt(txtAmount.getText());
-                } catch(NumberFormatException nfe) {
-                    JOptionPane.showMessageDialog(GUITradeDialog.this,
-                            "Amount should be an integer", "Error", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-                Cell cell = (Cell)cboProperties.getSelectedItem();
-                if(cell == null) return;
-                Player player = (Player)cboSellers.getSelectedItem();
-                Player currentPlayer = GameMaster.instance().getCurrentPlayer();
-                if(currentPlayer.getMoney() > amount) { 
-	                deal = new TradeDeal();
-	                deal.setAmount(amount);
-	                deal.setPropertyName(cell.getName());
-	                deal.setSellerIndex(GameMaster.instance().getPlayerIndex(player));
-                }
-                hide();
+
+        btnOK.setOnAction(e -> {
+            int amount = 0;
+            try {
+                amount = Integer.parseInt(txtAmount.getText());
+            } catch (NumberFormatException nfe) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error");
+                alert.setHeaderText(null);
+                alert.setContentText("Amount should be an integer");
+                alert.showAndWait();
+                return;
             }
+
+            edu.sumdu.monopoly.Cell cell = cboProperties.getValue();
+            if (cell == null) return;
+
+            Player player = cboSellers.getValue();
+            Player currentPlayer = GameMaster.instance().getCurrentPlayer();
+
+            if (currentPlayer.getMoney() > amount) {
+                deal = new TradeDeal();
+                deal.setAmount(amount);
+                deal.setPropertyName(cell.getName());
+                deal.setSellerIndex(GameMaster.instance().getPlayerIndex(player));
+            }
+            close();
         });
-        
-        this.pack();
+
+        Scene scene = new Scene(grid);
+        setScene(scene);
     }
 
     private void buildSellersCombo() {
         List sellers = GameMaster.instance().getSellerList();
         for (Iterator iter = sellers.iterator(); iter.hasNext();) {
             Player player = (Player) iter.next();
-            cboSellers.addItem(player);
+            cboSellers.getItems().add(player);
         }
-        if(sellers.size() > 0) {
-            updatePropertiesCombo((Player)sellers.get(0));
+        if (sellers.size() > 0) {
+            cboSellers.getSelectionModel().selectFirst();
+            updatePropertiesCombo((Player) sellers.get(0));
         }
     }
 
@@ -106,12 +104,14 @@ public class GUITradeDialog extends JDialog implements TradeDialog {
     }
 
     private void updatePropertiesCombo(Player player) {
-        cboProperties.removeAllItems();
-        Cell[] cells = player.getAllProperties();
-        btnOK.setEnabled(cells.length > 0);
-        for (int i = 0; i < cells.length; i++) {
-            cboProperties.addItem(cells[i]);
+        cboProperties.getItems().clear();
+        edu.sumdu.monopoly.Cell[] cells = player.getAllProperties();
+        btnOK.setDisable(cells.length == 0);
+        for (edu.sumdu.monopoly.Cell cell : cells) {
+            cboProperties.getItems().add(cell);
+        }
+        if (cells.length > 0) {
+            cboProperties.getSelectionModel().selectFirst();
         }
     }
-
 }
